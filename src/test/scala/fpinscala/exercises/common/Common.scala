@@ -7,7 +7,7 @@ import java.util.concurrent.{ExecutorService, Executors}
 
 object Common:
   lazy val service: ExecutorService = Executors.newFixedThreadPool(4)
-  lazy val theFirst21FibonacciNumbers =
+  lazy val theFirst21FibonacciNumbers: IndexedSeq[Int] =
     IndexedSeq(0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765)
   lazy val genLengthOfFibonacciSeq: Gen[Int] = Gen.choose(0, theFirst21FibonacciNumbers.length)
   lazy val genShortNumber: Gen[Int] = Gen.choose(0, 20)
