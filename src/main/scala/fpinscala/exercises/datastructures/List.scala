@@ -121,8 +121,26 @@ object List: // `List` companion object. Contains functions for creating and wor
   def filterViaFlatMap[A](as: List[A])(f: A => Boolean): List[A] =
     flatMap(as)(a => if f(a) then List(a) else Nil)
 
-  def addPairwise(a: List[Int], b: List[Int]): List[Int] = ???
+  def addPairwise(a: List[Int], b: List[Int]): List[Int] = (a, b) match
+    case (Nil, _)                   => Nil
+    case (_, Nil)                   => Nil
+    case (Cons(x, xs), Cons(y, ys)) => Cons(x + y, addPairwise(xs, ys))
 
-  // def zipWith - TODO determine signature
+  def zipWith[A](a: List[A], b: List[A], f: (A, A) => A): List[A] = (a, b) match
+    case (Nil, _)                   => Nil
+    case (_, Nil)                   => Nil
+    case (Cons(x, xs), Cons(y, ys)) => Cons(f(x, y), zipWith(xs, ys, f))
 
-  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = ???
+  @tailrec
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = (sup, sub) match
+    case (_, Nil) => true
+    case (Nil, _) => false
+    case (Cons(_, xs), _) =>
+      if startWith(sup, sub) then true
+      else hasSubsequence(xs, sub)
+
+  @tailrec
+  private def startWith[A](sup: List[A], sub: List[A]): Boolean = (sup, sub) match
+    case (_, Nil) => true
+    case (Nil, _) => false
+    case (Cons(x, xs), Cons(y, ys)) => x == y && startWith(xs, ys)
