@@ -1,5 +1,7 @@
 package fpinscala.exercises.datastructures
 
+import scala.annotation.tailrec
+
 /** `List` data type, parameterized on a type, `A`. */
 enum List[+A]:
   /** A `List` data constructor representing the empty list. */
@@ -24,7 +26,7 @@ object List: // `List` companion object. Contains functions for creating and wor
     else Cons(as.head, apply(as.tail*))
 
   @annotation.nowarn // Scala gives a hint here via a warning, so let's disable that
-  val x = List(1,2,3,4,5) match
+  val x: Int = List(1,2,3,4,5) match
     case Cons(x, Cons(2, Cons(4, _))) => x
     case Nil => 42
     case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
@@ -41,19 +43,31 @@ object List: // `List` companion object. Contains functions for creating and wor
       case Nil => acc
       case Cons(x, xs) => f(x, foldRight(xs, acc, f))
 
-  def sumViaFoldRight(ns: List[Int]) =
+  def sumViaFoldRight(ns: List[Int]): Int =
     foldRight(ns, 0, (x,y) => x + y)
 
-  def productViaFoldRight(ns: List[Double]) =
-    foldRight(ns, 1.0, _ * _) // `_ * _` is more concise notation for `(x,y) => x * y`; see sidebar
+  def productViaFoldRight(ns: List[Double]): Double =
+    foldRight(ns, 1.0, _ * _)
 
-  def tail[A](l: List[A]): List[A] = ???
+  def tail[A](l: List[A]): List[A] = l match
+    case Nil => throw new IllegalArgumentException
+    case Cons(x, xs) => xs
 
-  def setHead[A](l: List[A], h: A): List[A] = ???
+  def setHead[A](l: List[A], h: A): List[A] = l match
+    case Nil => throw new IllegalArgumentException
+    case Cons(_, xs) => Cons(h, xs)
 
-  def drop[A](l: List[A], n: Int): List[A] = ???
+  @tailrec
+  def drop[A](l: List[A], n: Int): List[A] =
+    if n <= 0 then l
+    else l match
+      case Cons(_, xs) if n >= 1 => drop(xs, n - 1)
+      case _ => Nil
 
-  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = ???
+  @tailrec
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match
+    case Cons(h, xs) if f(h) => dropWhile(xs, f)
+    case _ => l
 
   def init[A](l: List[A]): List[A] = ???
 
