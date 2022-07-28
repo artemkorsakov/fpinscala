@@ -84,13 +84,18 @@ object LazyList:
     if as.isEmpty then empty
     else cons(as.head, apply(as.tail*))
 
-  val ones: LazyList[Int] = LazyList.cons(1, ones)
+  val ones: LazyList[Int] = cons(1, ones)
 
-  def continually[A](a: A): LazyList[A] = ???
+  def continually[A](a: A): LazyList[A] =
+    cons(a, continually(a))
 
-  def from(n: Int): LazyList[Int] = ???
+  def from(n: Int): LazyList[Int] =
+    cons(n, from(n + 1))
 
-  lazy val fibs: LazyList[Int] = ???
+  lazy val fibs: LazyList[Int] =
+    def go(a: Int, b: Int): LazyList[Int] =
+      cons(a, go(b, a + b))
+    go(0, 1)
 
   def unfold[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] = ???
 
