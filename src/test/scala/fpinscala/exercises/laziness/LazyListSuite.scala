@@ -58,7 +58,15 @@ class LazyListSuite extends PropSuite:
     assertEquals(lazyList.forAll(_ != n), !lazyList.toList.contains(n))
   }
 
-  /*
+  test("LazyList.takeWhileViaFoldRight")(genSmallInt ** genLazyList) { case n ** lazyList =>
+    assertEquals(lazyList.takeWhileViaFoldRight(_ != n).toList, lazyList.toList.takeWhile(_ != n))
+  }
+
+  test("LazyList.headOptionViaFoldRight")(genLazyList) {
+    case Empty      => assert(Empty.headOptionViaFoldRight.isEmpty)
+    case Cons(h, t) => assert(Cons(h, t).headOptionViaFoldRight.contains(h()))
+  }
+  
   test("LazyList.map")(genSmallInt ** genLazyList) { case n ** lazyList =>
     assertEquals(lazyList.map(_ + n).toList, lazyList.toList.map(_ + n))
   }
@@ -74,7 +82,6 @@ class LazyListSuite extends PropSuite:
   test("LazyList.flatMap")(genSmallInt ** genLazyList) { case n ** lazyList =>
     assertEquals(lazyList.flatMap(a => LazyList(a + n)).toList, lazyList.toList.flatMap(a => List(a + n)))
   }
-   */
 
   test("LazyList.ones")(genMidInt) { n =>
     assertEquals(ones.take(n).toList, List.fill(n)(1))
