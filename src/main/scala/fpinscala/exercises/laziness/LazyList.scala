@@ -1,5 +1,7 @@
 package fpinscala.exercises.laziness
 
+import fpinscala.exercises.laziness.LazyList.cons
+
 enum LazyList[+A]:
   case Empty
   case Cons(h: () => A, t: () => LazyList[A])
@@ -116,7 +118,12 @@ enum LazyList[+A]:
   def hasSubsequence[A](l: LazyList[A]): Boolean =
     tails.exists(_.startsWith(l))
 
-  def scanRight[B](init: B)(f: (A, => B) => B): LazyList[B] = ???
+  def scanRight[B](init: B)(f: (A, => B) => B): LazyList[B] =
+    foldRight(init -> LazyList(init)) { (a, b0) =>
+      lazy val b1 = b0
+      val b2 = f(a, b1._1)
+      (b2, cons(b2, b1._2))
+    }._2
 
 object LazyList:
   def cons[A](hd: => A, tl: => LazyList[A]): LazyList[A] =
