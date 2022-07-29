@@ -120,8 +120,7 @@ class LazyListSuite extends PropSuite:
   test("LazyList.onesViaUnfold")(genMidInt) { n =>
     assertEquals(onesViaUnfold.take(n).toList, List.fill(n)(1))
   }
-
-  /*
+  
   test("LazyList.mapViaUnfold")(genSmallInt ** genLazyList) { case n ** lazyList =>
     assertEquals(lazyList.mapViaUnfold(_ + n).toList, lazyList.toList.map(_ + n))
   }
@@ -141,7 +140,6 @@ class LazyListSuite extends PropSuite:
   test("LazyList.zipAll")(genLazyList ** genLazyList) { case first ** second =>
     assertEquals(first.zipAll(second).toList, first.toList.map(Some(_)).zipAll(second.toList.map(Some(_)), None, None))
   }
-   */
 
   test("LazyList.startsWith")(genLazyList ** genLazyList) { case list1 ** list2 =>
     assertEquals(list1.startsWith(list2), list1.toList.startsWith(list2.toList))
