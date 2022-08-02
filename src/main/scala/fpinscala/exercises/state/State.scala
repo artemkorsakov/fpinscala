@@ -113,10 +113,39 @@ object State:
   def sequence[S, A](actions: List[State[S, A]]): State[S, List[A]] =
     actions.foldRight(unit[S, List[A]](Nil))((f, acc) => f.map2(acc)(_ :: _))
 
+  def traverse[S, A, B](as: List[A])(f: A => State[S, B]): State[S, List[B]] =
+    as.foldRight(unit[S, List[B]](Nil))((a, acc) => f(a).map2(acc)(_ :: _))
+
+  def modify[S](f: S => S): State[S, Unit] =
+    for
+      s <- get // Gets the current state and assigns it to `s`.
+      _ <- set(f(s)) // Sets the new state to `f` applied to `s`.
+    yield ()
+
+  def get[S]: State[S, S] = s => (s, s)
+
+  def set[S](s: S): State[S, Unit] = _ => ((), s)
+
 enum Input:
   case Coin, Turn
 
 case class Machine(locked: Boolean, candies: Int, coins: Int)
 
 object Candy:
-  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = ???
+
+  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] =
+    for
+      _ <- State.traverse(inputs)(i => State.modify(update(i)))
+      s <- State.get
+    yield (s.coins, s.candies)
+
+  private lazy val update: Input => Machine => Machine = (i: Input) =>
+    (s: Machine) =>
+      (i, s) match
+        case (_, Machine(_, 0, _))              => s
+        case (Input.Coin, Machine(false, _, _)) => s
+        case (Input.Turn, Machine(true, _, _))  => s
+        case (Input.Coin, Machine(true, candy, coin)) =>
+          Machine(false, candy, coin + 1)
+        case (Input.Turn, Machine(false, candy, coin)) =>
+          Machine(true, candy - 1, coin)

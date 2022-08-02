@@ -197,7 +197,7 @@ object Candy:
       s <- State.get
     yield (s.coins, s.candies)
 
-  val update = (i: Input) => (s: Machine) =>
+  val update: Input => Machine => Machine = (i: Input) => (s: Machine) =>
     (i, s) match
       case (_, Machine(_, 0, _)) => s
       case (Input.Coin, Machine(false, _, _)) => s
