@@ -142,13 +142,13 @@ object Nonblocking:
       Par.chooser(p)(b => if b then t else f)
 
     def choiceNViaFlatMap[A](p: Par[Int])(choices: List[Par[A]]): Par[A] =
-      ???
+      Par.chooser(p)(a => choices(a % choices.length))
 
-    def join[A](p: Par[Par[A]]): Par[A] =
-      ???
+    def join[A](ppa: Par[Par[A]]): Par[A] =
+      es => cb => ppa(es)(pa => eval(es)(pa(es)(cb)))
 
     def joinViaFlatMap[A](a: Par[Par[A]]): Par[A] =
-      ???
+      chooser(a)(a => a)
 
     def flatMapViaJoin[A, B](p: Par[A])(f: A => Par[B]): Par[B] =
-      ???
+      join(p.map(f))

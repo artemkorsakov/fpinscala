@@ -66,18 +66,18 @@ class NonblockingSuite extends PropSuite:
     checkFlatMap(p, ps)(Par.flatMapViaJoin[Int, String](p)(ps))
   }
 
-  private def checkChoice(t: Par[Int], f: Par[Int], p: Par[Boolean])(choice: Par[Int]) =
+  private def checkChoice(t: Par[Int], f: Par[Int], p: Par[Boolean])(choice: Par[Int]): Unit =
     val actual = choice.run(es)
     val expected = if p.run(es) then t.run(es) else f.run(es)
     assertEquals(actual, expected)
 
-  private def checkChoiceN(p: Par[Int], ps: List[Par[String]])(choice: Par[String]) =
+  private def checkChoiceN(p: Par[Int], ps: List[Par[String]])(choice: Par[String]): Unit =
     val actual = choice.run(es)
     val i = p.run(es) % ps.length
     val expected = ps(i).run(es)
     assertEquals(actual, expected)
 
-  private def checkFlatMap(p: Par[Int], ps: Map[Int, Par[String]])(choice: Par[String]) =
+  private def checkFlatMap(p: Par[Int], ps: Map[Int, Par[String]])(choice: Par[String]): Unit =
     val actual: String = choice.run(es)
     val key = p.run(es)
     val expected: String = ps(key).run(es)
