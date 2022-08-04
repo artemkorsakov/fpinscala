@@ -22,8 +22,7 @@ class ParsersSuite extends PropSuite:
     val anotherString = s"b$s"
     assert(string(nonEmptyS).run(anotherString).isLeft)
   }
-
-  /*
+  
   test("Parsers.or")(Gen.unit(())) { _ =>
     val orParser = string("abra").or(string("cadabra"))
     assertEquals(orParser.run("abra"), Right("abra"))
@@ -143,7 +142,6 @@ class ParsersSuite extends PropSuite:
     assert(nConsecutiveAs.run("aaaa").isLeft)
     assert(nConsecutiveAs.run("-4aaaa").isLeft)
   }
-  */
 
   private def unbiasL[A, B, C](p: ((A, B), C)): (A, B, C) = (p(0)(0), p(0)(1), p(1))
   private def unbiasR[A, B, C](p: (A, (B, C))): (A, B, C) = (p(0), p(1)(0), p(1)(1))

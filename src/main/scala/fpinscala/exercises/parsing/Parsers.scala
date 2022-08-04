@@ -12,6 +12,19 @@ trait Parsers[Parser[+_]] { self => // so inner classes may call methods of trai
 
     def |(p2: => Parser[A]): Parser[A] = p.or(p2)
 
+    def listOfN(n: Int): Parser[List[A]] = ???
+
+    def map[B](f: A => B): Parser[B] = ???
+
+    def map2[B, C](p2: => Parser[B])(f: (A, B) => C): Parser[C] = ???
+
+    def many: Parser[List[A]] = ???
+
+    def many1: Parser[List[A]] = ???
+
+    def product[B](p2: => Parser[B]): Parser[(A, B)] = ???
+
+    def **[B](p2: => Parser[B]): Parser[(A, B)] = product(p2)
 
   object Laws {
   }
@@ -47,6 +60,6 @@ case class ParseError(stack: List[(Location,String)] = List(),
 class Examples[Parser[+_]](P: Parsers[Parser]):
   import P.*
 
-  val nonNegativeInt: Parser[Int] = ???
+  lazy val nonNegativeInt: Parser[Int] = ???
 
-  val nConsecutiveAs: Parser[Int] = ???
+  lazy val nConsecutiveAs: Parser[Int] = ???
