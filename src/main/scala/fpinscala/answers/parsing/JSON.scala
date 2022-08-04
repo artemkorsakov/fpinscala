@@ -1,7 +1,5 @@
 package fpinscala.answers.parsing
 
-import language.higherKinds
-
 enum JSON:
   case JNull
   case JNumber(get: Double)
@@ -41,7 +39,7 @@ object JSON:
 /**
  * JSON parsing example.
  */
-@main def jsonExample =
+@main def jsonExample() =
   val jsonTxt = """
 {
   "Company name" : "Microsoft Corporation",
@@ -68,7 +66,7 @@ object JSON:
 ]
 """
 
-  def printResult[E](e: Either[E,JSON]) =
+  def printResult[E](e: Either[E,JSON]): Unit =
     e.fold(println, println)
 
   val parser = JSON.jsonParser(Reference)

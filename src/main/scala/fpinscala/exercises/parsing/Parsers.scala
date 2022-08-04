@@ -2,10 +2,16 @@ package fpinscala.exercises.parsing
 
 trait Parsers[Parser[+_]] { self => // so inner classes may call methods of trait
 
-  case class ParserOps[A](p: Parser[A]) {
+  def char(c: Char): Parser[Char] = ???
 
+  extension[A] (p: Parser[A])
 
-  }
+    def run(input: String): Either[ParseError, A]
+
+    infix def or(p2: => Parser[A]): Parser[A]
+
+    def |(p2: => Parser[A]): Parser[A] = p.or(p2)
+
 
   object Laws {
   }
