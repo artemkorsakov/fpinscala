@@ -57,7 +57,6 @@ class MonoidSuite extends PropSuite:
     assertEquals(m.combine(a, m.combine(b, c))(i0), m.combine(m.combine(a, b), c)(i0), "associativity")
   }
 
-  /* GenSuite from chapter 8 must be passed
   test("Monoid.monoidLaws")(Gen.unit(())) { _ =>
     import fpinscala.exercises.testing.Gen as EGen
     import fpinscala.exercises.testing.Prop.Result.*
@@ -65,13 +64,12 @@ class MonoidSuite extends PropSuite:
     val genInt = EGen.choose(Int.MinValue, Int.MaxValue)
     val genOption = genInt.map(i => if i % 2 == 0 then Some(i / 2) else None)
 
-    assertEquals(monoidLaws(intAddition, genInt).check(), Passed)
-    assertEquals(monoidLaws(intMultiplication, genInt).check(), Passed)
-    assertEquals(monoidLaws(booleanOr, EGen.boolean).check(), Passed)
-    assertEquals(monoidLaws(booleanAnd, EGen.boolean).check(), Passed)
-    assertEquals(monoidLaws(optionMonoid[Int], genOption).check(), Passed)
+    monoidLaws(intAddition, genInt).run()
+    monoidLaws(intMultiplication, genInt).run()
+    monoidLaws(booleanOr, EGen.boolean).run()
+    monoidLaws(booleanAnd, EGen.boolean).run()
+    monoidLaws(optionMonoid[Int], genOption).run()
   }
-  */
 
   test("Monoid.combineAll")(genIntList ** genStringList ** genBooleanList) { case ilist ** slist ** blist =>
     assertEquals(combineAll(slist, stringMonoid), slist.mkString)

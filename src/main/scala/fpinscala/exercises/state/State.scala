@@ -38,6 +38,10 @@ object RNG:
     val m = if n == Int.MaxValue then 0.0 else n.toDouble / Int.MaxValue
     (m, rng2)
 
+  def boolean(rng: RNG): (Boolean, RNG) =
+    rng.nextInt match
+      case (i, rng2) => (i % 2 == 0, rng2)
+    
   def intDouble(rng: RNG): ((Int, Double), RNG) =
     val (n, rng2) = rng.nextInt
     val (d, rng3) = double(rng2)
