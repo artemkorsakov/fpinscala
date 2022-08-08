@@ -9,12 +9,12 @@ trait Monoid[A]:
 object Monoid:
 
   val stringMonoid: Monoid[String] = new:
-    def combine(a1: String, a2: String) = a1 + a2
-    val empty = ""
+    def combine(a1: String, a2: String): String = a1 + a2
+    val empty: String = ""
 
   def listMonoid[A]: Monoid[List[A]] = new:
-    def combine(a1: List[A], a2: List[A]) = a1 ++ a2
-    val empty = Nil
+    def combine(a1: List[A], a2: List[A]): List[A] = a1 ++ a2
+    val empty: List[A] = Nil
 
   lazy val intAddition: Monoid[Int] = ???
 
@@ -28,11 +28,11 @@ object Monoid:
 
   def dual[A](m: Monoid[A]): Monoid[A] = new:
     def combine(x: A, y: A): A = m.combine(y, x)
-    val empty = m.empty
+    val empty: A = m.empty
 
   def endoMonoid[A]: Monoid[A => A] = ???
 
-  import fpinscala.exercises.testing.{Prop, Gen}
+  import fpinscala.exercises.testing.{Gen, Prop}
   // import Gen.`**`
 
   def monoidLaws[A](m: Monoid[A], gen: Gen[A]): Prop = ???
@@ -52,10 +52,10 @@ object Monoid:
   def foldMapV[A, B](as: IndexedSeq[A], m: Monoid[B])(f: A => B): B =
     ???
 
-  def par[A](m: Monoid[A]): Monoid[Par[A]] = 
+  def par[A](m: Monoid[A]): Monoid[Par[A]] =
     ???
 
-  def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] = 
+  def parFoldMap[A, B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] =
     ???
 
   def ordered(ints: IndexedSeq[Int]): Boolean =
@@ -70,16 +70,16 @@ object Monoid:
   def count(s: String): Int = ???
 
   given productMonoid[A, B](using ma: Monoid[A], mb: Monoid[B]): Monoid[(A, B)] with
-    def combine(x: (A, B), y: (A, B)) = ???
-    val empty = ???
+    def combine(x: (A, B), y: (A, B)): (A, B) = ???
+    val empty: (A, B) = ???
 
   given functionMonoid[A, B](using mb: Monoid[B]): Monoid[A => B] with
-    def combine(f: A => B, g: A => B) = ???
+    def combine(f: A => B, g: A => B): A => B = ???
     val empty: A => B = a => ???
 
   given mapMergeMonoid[K, V](using mv: Monoid[V]): Monoid[Map[K, V]] with
-    def combine(a: Map[K, V], b: Map[K, V]) = ???
-    val empty = ???
+    def combine(a: Map[K, V], b: Map[K, V]): Map[K, V] = ???
+    val empty: Map[K, V] = ???
 
   def bag[A](as: IndexedSeq[A]): Map[A, Int] =
     ???
