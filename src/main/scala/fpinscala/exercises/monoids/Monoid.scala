@@ -2,6 +2,8 @@ package fpinscala.exercises.monoids
 
 import fpinscala.exercises.parallelism.Nonblocking.*
 
+import scala.annotation.tailrec
+
 trait Monoid[A]:
   def combine(a1: A, a2: A): A
   def empty: A
@@ -62,28 +64,42 @@ object Monoid:
     associativity && identity
 
   def combineAll[A](as: List[A], m: Monoid[A]): A =
-    ???
+    as.foldLeft(m.empty)(m.combine)
 
   def foldMap[A, B](as: List[A], m: Monoid[B])(f: A => B): B =
-    ???
+    as.foldLeft(m.empty)((b, a) => m.combine(b, f(a)))
 
   def foldRight[A, B](as: List[A])(acc: B)(f: (A, B) => B): B =
-    ???
+    foldMap(as, endoMonoid[B])(f.curried)(acc)
 
   def foldLeft[A, B](as: List[A])(acc: B)(f: (B, A) => B): B =
-    ???
+    foldMap(as, dual(endoMonoid[B]))(a => b => f(b, a))(acc)
 
   def foldMapV[A, B](as: IndexedSeq[A], m: Monoid[B])(f: A => B): B =
-    ???
+    if as.isEmpty then m.empty
+    else if as.length == 1 then f(as(0))
+    else
+      val (l, r) = as.splitAt(as.length / 2)
+      m.combine(foldMapV(l, m)(f), foldMapV(r, m)(f))
 
-  def par[A](m: Monoid[A]): Monoid[Par[A]] =
-    ???
+  def par[A](m: Monoid[A]): Monoid[Par[A]] = new:
+    def combine(x: Par[A], y: Par[A]): Par[A] = x.map2(y)(m.combine)
+    val empty: Par[A] = Par.unit(m.empty)
 
-  def parFoldMap[A, B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] =
-    ???
+  def parFoldMap[A, B](as: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] =
+    Par.parMap(as)(f).flatMap(bs => foldMapV(bs, par(m))(b => Par.lazyUnit(b)))
+
+  private case class Interval(ordered: Boolean, min: Int, max: Int)
+
+  private val orderedMonoid: Monoid[Option[Interval]] = new:
+    def combine(oa1: Option[Interval], oa2: Option[Interval]): Option[Interval] =
+      (oa1, oa2) match
+        case (Some(a1), Some(a2)) => Some(Interval(a1.ordered && a2.ordered && a1.max <= a2.min, a1.min, a2.max))
+        case (x, y)               => x.orElse(y)
+    val empty: Option[Interval] = None
 
   def ordered(ints: IndexedSeq[Int]): Boolean =
-    ???
+    foldMapV(ints, orderedMonoid)(i => Some(Interval(true, i, i))).forall(_.ordered)
 
   enum WC:
     case Stub(chars: String)

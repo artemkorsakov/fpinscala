@@ -124,18 +124,17 @@ object Monoid:
 
   case class Interval(ordered: Boolean, min: Int, max: Int)
   val orderedMonoid: Monoid[Option[Interval]] = new:
-    def combine(oa1: Option[Interval], oa2: Option[Interval]) =
+    def combine(oa1: Option[Interval], oa2: Option[Interval]): Option[Interval] =
       (oa1, oa2) match
         case (Some(a1), Some(a2)) =>
           Some(Interval(a1.ordered && a2.ordered && a1.max <= a2.min,
             a1.min, a2.max))
-        case (x, None) => x
-        case (None, x) => x
-    val empty = None
+        case (x, y) => x.orElse(y)
+    val empty: Option[Interval] = None
 
   def ordered(ints: IndexedSeq[Int]): Boolean =
     foldMapV(ints, orderedMonoid)(i => Some(Interval(true, i, i)))
-      .map(_.ordered).getOrElse(true)
+      .forall(_.ordered)
 
   enum WC:
     case Stub(chars: String)
