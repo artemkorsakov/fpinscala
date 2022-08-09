@@ -105,9 +105,24 @@ object Monoid:
     case Stub(chars: String)
     case Part(lStub: String, words: Int, rStub: String)
 
-  lazy val wcMonoid: Monoid[WC] = ???
+  lazy val wcMonoid: Monoid[WC] = new:
+    def combine(wc1: WC, wc2: WC): WC = (wc1, wc2) match
+      case (WC.Stub(a), WC.Stub(b))       => WC.Stub(a + b)
+      case (WC.Stub(a), WC.Part(l, w, r)) => WC.Part(a + l, w, r)
+      case (WC.Part(l, w, r), WC.Stub(a)) => WC.Part(l, w, r + a)
+      case (WC.Part(l1, w1, r1), WC.Part(l2, w2, r2)) =>
+        WC.Part(l1, w1 + (if (r1 + l2).isEmpty then 0 else 1) + w2, r2)
 
-  def count(s: String): Int = ???
+    val empty: WC = WC.Stub("")
+
+  def count(s: String): Int =
+    def wc(c: Char): WC =
+      if c.isWhitespace then WC.Part("", 0, "")
+      else WC.Stub(c.toString)
+    def unstub(s: String) = if s.isEmpty then 0 else 1
+    foldMapV(s.toIndexedSeq, wcMonoid)(wc) match
+      case WC.Stub(s)       => unstub(s)
+      case WC.Part(l, w, r) => unstub(l) + w + unstub(r)
 
   given productMonoid[A, B](using ma: Monoid[A], mb: Monoid[B]): Monoid[(A, B)] with
     def combine(x: (A, B), y: (A, B)): (A, B) = ???
