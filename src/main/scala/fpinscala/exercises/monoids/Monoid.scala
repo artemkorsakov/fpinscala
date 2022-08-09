@@ -125,18 +125,23 @@ object Monoid:
       case WC.Part(l, w, r) => unstub(l) + w + unstub(r)
 
   given productMonoid[A, B](using ma: Monoid[A], mb: Monoid[B]): Monoid[(A, B)] with
-    def combine(x: (A, B), y: (A, B)): (A, B) = ???
-    val empty: (A, B) = ???
+    def combine(x: (A, B), y: (A, B)): (A, B) =
+      (ma.combine(x(0), y(0)), mb.combine(x(1), y(1)))
+    val empty: (A, B) = (ma.empty, mb.empty)
 
   given functionMonoid[A, B](using mb: Monoid[B]): Monoid[A => B] with
-    def combine(f: A => B, g: A => B): A => B = ???
-    val empty: A => B = a => ???
+    def combine(f: A => B, g: A => B): A => B = a => mb.combine(f(a), g(a))
+    val empty: A => B = _ => mb.empty
 
   given mapMergeMonoid[K, V](using mv: Monoid[V]): Monoid[Map[K, V]] with
-    def combine(a: Map[K, V], b: Map[K, V]): Map[K, V] = ???
-    val empty: Map[K, V] = ???
+    def combine(a: Map[K, V], b: Map[K, V]): Map[K, V] =
+      (a.keySet ++ b.keySet).foldLeft(empty) { (acc, k) =>
+        acc.updated(k, mv.combine(a.getOrElse(k, mv.empty), b.getOrElse(k, mv.empty)))
+      }
+    val empty: Map[K, V] = Map()
 
   def bag[A](as: IndexedSeq[A]): Map[A, Int] =
-    ???
+    val bagMonoid = mapMergeMonoid[A, Int](using intAddition)
+    foldMapV(as, bagMonoid)(a => Map(a -> 1))
 
 end Monoid
