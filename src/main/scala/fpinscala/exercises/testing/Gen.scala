@@ -149,6 +149,8 @@ object Gen:
     def **[B](gb: Gen[B]): Gen[(A, B)] =
       map2(gb)((_, _))
 
+    def next(rng: RNG): (A, RNG) = State.run(self)(rng) // necessary for MonadSuite
+
   def apply[A](s: State[RNG, A]): Gen[A] = s
 
   def unit[A](a: => A): Gen[A] =
