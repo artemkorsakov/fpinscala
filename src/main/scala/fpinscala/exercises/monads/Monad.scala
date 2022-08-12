@@ -61,14 +61,14 @@ trait Monad[F[_]] extends Functor[F]:
 
   extension [A](ffa: F[F[A]])
     def join: F[A] =
-      ???
+      ffa.flatMap(identity)
 
   extension [A](fa: F[A])
     def flatMapViaJoinAndMap[B](f: A => F[B]): F[B] =
-      ???
+      fa.map(f).join
 
   def composeViaJoinAndMap[A, B, C](f: A => F[B], g: B => F[C]): A => F[C] =
-    ???
+    a => f(a).map(g).join
 
 end Monad
 
@@ -114,16 +114,16 @@ end Monad
 
 case class Id[+A](value: A):
   def map[B](f: A => B): Id[B] =
-    ???
+    Id(f(value))
   def flatMap[B](f: A => Id[B]): Id[B] =
-    ???
+    f(value)
 
 object Id:
   given idMonad: Monad[Id] with
-    def unit[A](a: => A): Id[A] = ???
+    def unit[A](a: => A): Id[A] = Id(a)
     extension [A](fa: Id[A])
       override def flatMap[B](f: A => Id[B]): Id[B] =
-        ???
+        fa.flatMap(f)
 
 opaque type Reader[-R, +A] = R => A
 
@@ -131,7 +131,8 @@ object Reader:
   extension [R, A](ra: Reader[R, A]) def run(r: R): A = ra(r)
 
   given readerMonad[R]: Monad[Reader[R, _]] with
-    def unit[A](a: => A): Reader[R, A] = ???
+    def unit[A](a: => A): Reader[R, A] = _ => a
+
     extension [A](fa: Reader[R, A])
       override def flatMap[B](f: A => Reader[R, B]): Reader[R, B] =
-        ???
+        r => f(fa(r))(r)
