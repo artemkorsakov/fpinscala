@@ -62,7 +62,7 @@ class ApplicativeSuite extends PropSuite:
 
   test("Validated.validatedApplicative")(genWebForm) { case ((name, nameErr), (date, dateErr), (phone, phoneErr)) =>
     val validated: Validated[List[String], WebForm] = validateWebForm(name, date, phone)
-    val errors = List(phoneErr, nameErr, dateErr).flatten
+    val errors = List(nameErr, dateErr, phoneErr).flatten
     if errors.isEmpty then assertEquals(validated, Valid(WebForm("Bob", LocalDate.of(1984, 12, 31), "0123456789")))
     else assertEquals(validated, Invalid(errors))
   }
@@ -184,21 +184,21 @@ object ApplicativeSuite extends Assertions:
     else Invalid(List("Phone number must be 10 digits"))
 
   private def validateWebForm(
-                               name: String,
-                               birthdate: String,
-                               phone: String
-                             ): Validated[List[String], WebForm] =
+      name: String,
+      birthdate: String,
+      phone: String
+  ): Validated[List[String], WebForm] =
     validName(name).map3(
       validBirthdate(birthdate),
       validPhone(phone)
     )(WebForm(_, _, _))
 
   private def assertApplicativeLaws[F[_]](
-                                           applicative: Applicative[F[_]],
-                                           a: List[Int],
-                                           f: List[Int] => Int,
-                                           g: Int => String
-                                         ): Unit =
+      applicative: Applicative[F[_]],
+      a: List[Int],
+      f: List[Int] => Int,
+      g: Int => String
+  ): Unit =
     import applicative.unit
 
     val fa = unit(a)
@@ -210,11 +210,11 @@ object ApplicativeSuite extends Assertions:
     assertNaturalityLaw[F[_]](applicative, fa, fb, f, g)
 
   private def assertFunctorLaws[F[_]](
-                                       appl: Applicative[F[_]],
-                                       a: List[Int],
-                                       f: List[Int] => Int,
-                                       g: Int => String
-                                     ): Unit =
+      appl: Applicative[F[_]],
+      a: List[Int],
+      f: List[Int] => Int,
+      g: Int => String
+  ): Unit =
     import appl.{map, unit}
 
     val v: F[List[Int]] = unit(a)
@@ -238,12 +238,12 @@ object ApplicativeSuite extends Assertions:
     assertEquals(leftSide, map(rightSide)(assoc))
 
   private def assertNaturalityLaw[F[_]](
-                                         appl: Applicative[F[_]],
-                                         fa: F[List[Int]],
-                                         fb: F[Int],
-                                         a2c: List[Int] => Int,
-                                         b2d: Int => String
-                                       ): Unit =
+      appl: Applicative[F[_]],
+      fa: F[List[Int]],
+      fb: F[Int],
+      a2c: List[Int] => Int,
+      b2d: Int => String
+  ): Unit =
     import appl.{map, map2, product}
 
     def productF[I, O, I2, O2](f: I => O, g: I2 => O2): (I, I2) => (O, O2) = (i, i2) => (f(i), g(i2))
