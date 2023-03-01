@@ -205,8 +205,9 @@ object Gen:
 
   val string: SGen[String] = SGen(stringN)
 
-  object ** :
+  object ** {
     def unapply[A, B](p: (A, B)): Option[(A, B)] = Some(p)
+  }
 
   def genStringIntFn(g: Gen[Int]): Gen[String => Int] =
     g.map(i => s => i)
