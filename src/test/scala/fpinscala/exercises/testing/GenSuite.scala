@@ -14,19 +14,6 @@ class GenSuite extends PropSuite:
   private val shortSample = 1000
   private val genRNG: ExhGen[RNG] = ExhGen.int.map(i => RNG.Simple(i.toLong))
 
-// Gen tests: Before using these tests (starting from Exercise 8.4),
-// add the next block to fpinscala.exercises.testing.Gen.scala file
-/* ToDo: fpinscala.exercises.testing.Gen.scala file's block
-opaque type Gen[+A] = State[RNG, A]
-
-object Gen:
-  extension [A](self: Gen[A])
-    // We should use a different method name to avoid looping (not 'run')
-    def next(rng: RNG): (A, RNG) = self.run(rng)
-*/
-
-// Gen tests:
-/*
   test("Exercise 8.4")(ExhGen.int ** ExhGen.int ** genRNG) { case n ** m ** rng =>
     val (start, stopExclusive) = if n < m then (n, m) else (m, n)
     val (k, _) = Gen.choose(start, stopExclusive).next(rng)
@@ -91,24 +78,7 @@ object Gen:
     assert(unionList3.count(_ == n) >= shortSample / 5, "g2 is twice as common as g1")
     assert(unionList3.count(_ == m) >= shortSample / 2, "g2 is twice as common as g1")
   }
-*/
 
-
-// Prop tests: Before using these tests (starting from Exercise 8.9),
-// add the next block to fpinscala.exercises.testing.Gen.scala file
-/* ToDo: fpinscala.exercises.testing.Gen.scala file's block
-object Prop:
-  extension (self: Prop)
-    def check(
-               maxSize: MaxSize = 100,
-               testCases: TestCases = 100,
-               rng: RNG = RNG.Simple(System.currentTimeMillis)
-             ): Result =
-      self(maxSize, testCases, rng)
-*/
-
-// Prop tests
-/*
   import fpinscala.exercises.testing.Prop.Result.*
 
   private val propPassed = Prop((n, rng) => Passed)
@@ -126,21 +96,7 @@ object Prop:
     assertEquals((propFalsified || propPassed).check(), Passed)
     assert((propFalsified || propFalsified).check().isFalsified)
   }
-*/
 
-
-// SGen tests: Before using these tests (starting from Exercise 8.10),
-// add the next block to fpinscala.exercises.testing.Gen.scala file
-/* ToDo: fpinscala.exercises.testing.Gen.scala file's block
-object SGen:
-  def apply[A](f: Int => Gen[A]): SGen[A] = f
-
-  extension [A](self: SGen[A])
-    def apply(n: Int): Gen[A] = self(n)
-*/
-
-// SGen tests
-/*
   test("Exercises 8.10 + 8.11")(ExhGen.int ** genRNG) { case n ** rng0 =>
     val sGenA = SGen(Gen.unit(_))
     def aToB(a: Int) = a % 2 == 0
@@ -161,4 +117,3 @@ object SGen:
     val (randomNonEmptyList, _) = Gen.boolean.nonEmptyList(n).next(rng)
     assert(randomNonEmptyList.nonEmpty)
   }
-*/

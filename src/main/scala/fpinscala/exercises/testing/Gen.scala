@@ -106,6 +106,13 @@ object Prop:
         case Proved =>
           println(s"+ OK, proved property.")
 
+    def check(
+        maxSize: MaxSize = 100,
+        testCases: TestCases = 100,
+        rng: RNG = RNG.Simple(System.currentTimeMillis)
+    ): Result =
+      self(maxSize, testCases, rng)
+
   val executor: ExecutorService = Executors.newCachedThreadPool
 
   def check(p: => Boolean): Prop =
@@ -191,6 +198,9 @@ object Gen:
       i <- choose(from, to)
       j <- if i % 2 == 0 then even(from, to) else odd(from, to)
     yield (i, j)
+
+  def union[A](g1: Gen[A], g2: Gen[A]): Gen[A] =
+    boolean.flatMap(b => if b then g1 else g2)
 
   def weighted[A](g1: (Gen[A], Double), g2: (Gen[A], Double)): Gen[A] =
     /* The probability we should pull from `g1`. */
