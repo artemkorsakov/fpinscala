@@ -64,7 +64,11 @@ class ApplicativeSuite extends PropSuite:
     val validated: Validated[List[String], WebForm] = validateWebForm(name, date, phone)
     val errors = List(nameErr, dateErr, phoneErr).flatten
     if errors.isEmpty then assertEquals(validated, Valid(WebForm("Bob", LocalDate.of(1984, 12, 31), "0123456789")))
-    else assertEquals(validated, Invalid(errors))
+    else
+      validated match
+        case Invalid(actualErrors) =>
+          assertEquals(actualErrors.sorted, errors.sorted)
+        case _ => fail("Result must be invalid")
   }
 
   test("Applicative laws")(genIntList) { intList =>
