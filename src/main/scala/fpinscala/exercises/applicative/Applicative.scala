@@ -66,7 +66,11 @@ trait Applicative[F[_]] extends Functor[F]:
       self.apply(fga2gb)(fa)
 
   def sequenceMap[K, V](ofa: Map[K, F[V]]): F[Map[K, V]] =
-    ???
+    ofa.foldRight(unit(Map.empty[K, V])) { case ((key, fv), acc) =>
+      fv.map2(acc) { (v, resMap) =>
+        resMap + (key -> v)
+      }
+    }
 
 object Applicative:
   opaque type ZipList[+A] = LazyList[A]
@@ -79,7 +83,7 @@ object Applicative:
       def unit[A](a: => A): ZipList[A] =
         LazyList.continually(a)
       extension [A](fa: ZipList[A])
-        override def map2[B, C](fb: ZipList[B])(f: (A, B) => C) =
+        override def map2[B, C](fb: ZipList[B])(f: (A, B) => C): ZipList[C] =
           fa.zip(fb).map(f.tupled)
 
   enum Validated[+E, +A]:
