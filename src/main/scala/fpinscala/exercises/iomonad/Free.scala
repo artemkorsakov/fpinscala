@@ -43,9 +43,9 @@ enum Free[+F[_], A]:
 
 object Free:
   given freeMonad[F[_]]: Monad[[x] =>> Free[F, x]] with
-    def unit[A](a: => A) = Return(a)
+    def unit[A](a: => A): Free[F, A] = Return(a)
     extension [A](fa: Free[F, A])
-      def flatMap[B](f: A => Free[F, B]) = fa.flatMap(f)
+      def flatMap[B](f: A => Free[F, B]): Free[F, B] = fa.flatMap(f)
 
   extension [A](fa: Free[Function0, A])
     @annotation.tailrec

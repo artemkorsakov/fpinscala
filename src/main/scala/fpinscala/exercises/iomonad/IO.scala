@@ -31,7 +31,7 @@ object IO:
       ioa.run.run(pool)
 
   given monad: Monad[IO] with
-    def unit[A](a: => A) = IO(a)
+    def unit[A](a: => A): IO[A] = IO(a)
     extension [A](fa: IO[A])
       def flatMap[B](f: A => IO[B]): IO[B] =
         fa.flatMap(f)

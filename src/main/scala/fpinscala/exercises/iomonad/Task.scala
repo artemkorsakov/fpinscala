@@ -66,7 +66,7 @@ object Task:
     try Right(a) catch { case NonFatal(e) => Left(e) }
 
   given monad: Monad[Task] with
-    def unit[A](a: => A) = Task(a)
+    def unit[A](a: => A): Task[A] = Task(a)
     extension [A](fa: Task[A])
       def flatMap[B](f: A => Task[B]): Task[B] =
         Task.flatMap(fa)(f)

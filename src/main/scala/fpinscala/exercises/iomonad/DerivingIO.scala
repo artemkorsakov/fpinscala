@@ -417,9 +417,9 @@ object IO3:
 
     // Exercise 1: Implement a free monad for any type constructor F
     given freeMonad[F[_]]: Monad[[x] =>> Free[F, x]] with
-      def unit[A](a: => A) = ???
+      def unit[A](a: => A): Free[F, A] = Return(a)
       extension [A](fa: Free[F, A])
-        def flatMap[B](f: A => Free[F, B]) = ???
+        def flatMap[B](f: A => Free[F, B]): Free[F, B] = FlatMap(fa, f)
 
     // Exercise 2: Implement runTrampoline
     extension [A](fa: Free[Function0, A])
