@@ -225,7 +225,7 @@ object IO2aTests:
 
   val f = (i: Int) => IO.Return(i)
 
-  val g = List.fill(10000)(f).foldLeft(f)((a, b) => x => IO.suspend(a(x).flatMap(b)))
+  val g: Int => IO[Int] = List.fill(10000)(f).foldLeft(f)((a, b) => x => IO.suspend(a(x).flatMap(b)))
 
   @main def runIO2a: Unit =
     val gFortyTwo = g(42)
@@ -423,7 +423,14 @@ object IO3:
 
     // Exercise 2: Implement runTrampoline
     extension [A](fa: Free[Function0, A])
-      def runTrampoline: A = ???
+      @annotation.tailrec
+      def runTrampoline: A = fa match
+        case Return(a) => a
+        case Suspend(s) => s()
+        case FlatMap(fx, f) => fx match
+          case Return(x) => f(x).runTrampoline
+          case Suspend(tx) => f(tx()).runTrampoline
+          case FlatMap(fy, g) => fy.flatMap(y => g(y).flatMap(f)).runTrampoline
 
   /*
   The type constructor `F` lets us control the set of external requests our
