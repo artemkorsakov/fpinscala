@@ -43,10 +43,9 @@ object IO0:
 
   // A pure version is not possible!
   /*
-  def converter: IO = {
+  def converter: IO =
     val prompt: IO = PrintLine("Enter a temperature in degrees fahrenheit: ")
     // now what ???
-  }
   */
 end IO0
 
@@ -147,15 +146,13 @@ object IO1:
 
   val factorialREPL: IO[Unit] = sequence_(
     PrintLine(helpstring),
-    ReadLine.doWhile { line =>
+    ReadLine.doWhile: line =>
       val ok = line != "q"
-      when(ok) {
+      when(ok):
         for
           n <- factorial(line.toInt)
           _ <- PrintLine("factorial: " + n)
         yield ()
-      }
-    }
   )
 end IO1
 
@@ -455,11 +452,10 @@ object IO3:
     // other interpreters
     def toState: ConsoleState[A] = this match
       case ReadLine =>
-        ConsoleState { bufs =>
+        ConsoleState: bufs =>
           bufs.in match
             case List() => (None, bufs)
             case h :: t => (Some(h), bufs.copy(in = t))
-        }
       case PrintLine(line) =>
         ConsoleState(bufs => ((), bufs.copy(out = bufs.out :+ line))) // append to the output
 
@@ -527,15 +523,13 @@ object IO3:
   // A specialized state monad
   case class ConsoleState[A](run: Buffers => (A, Buffers)):
     def map[B](f: A => B): ConsoleState[B] =
-      ConsoleState { s =>
+      ConsoleState: s =>
         val (a, s1) = run(s)
         (f(a), s1)
-      }
     def flatMap[B](f: A => ConsoleState[B]): ConsoleState[B] =
-      ConsoleState { s =>
+      ConsoleState: s =>
         val (a, s1) = run(s)
         f(a).run(s1)
-      }
 
   object ConsoleState:
     given monad: Monad[ConsoleState] with
@@ -661,9 +655,8 @@ object IO4:
       Free.Suspend(Files.ReadLines(file))
 
   def cat(file: String): Free[[x] =>> Files[x] | Console[x], Unit] =
-    Files.readLines(file).flatMap { lines =>
+    Files.readLines(file).flatMap: lines =>
       Console.printLn(lines.mkString("\n"))
-    }
 
   extension [A](fa: Free[[x] =>> Files[x] | Console[x], A])
     def toThunk: () => A = 
@@ -725,9 +718,8 @@ object IO5:
       def writeLines(file: String, lines: List[String]) = () => ()
 
   def cat[F[_]](file: String)(using c: Console[F], f: Files[F], m: Monad[F]): F[Unit] =
-    f.readLines(file).flatMap { lines => 
+    f.readLines(file).flatMap: lines => 
       c.printLn(lines.mkString("\n"))
-    }
 
   def runCatThunk(): Unit = cat[Function0]("file")()
 

@@ -23,10 +23,9 @@ object RNG:
     rng => (a, rng)
 
   def map[A, B](s: Rand[A])(f: A => B): Rand[B] =
-    rng => {
+    rng =>
       val (a, rng2) = s(rng)
       (f(a), rng2)
-    }
 
   def nonNegativeInt(rng: RNG): (Int, RNG) =
     val (n, rng2) = rng.nextInt
