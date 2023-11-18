@@ -2,10 +2,8 @@ package fpinscala.exercises.datastructures
 
 import fpinscala.answers.testing.exhaustive.*
 import fpinscala.answers.testing.exhaustive.Gen.`**`
-import fpinscala.answers.testing.exhaustive.Prop.*
 import fpinscala.exercises.common.Common.{genShortNumber, genDoubleList as genDoubleSList, genIntList as genIntSList}
 import fpinscala.exercises.common.PropSuite
-import fpinscala.exercises.datastructures.*
 import fpinscala.exercises.datastructures.List.*
 
 import scala.util.Try

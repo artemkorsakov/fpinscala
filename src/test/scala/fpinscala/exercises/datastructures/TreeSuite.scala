@@ -1,10 +1,7 @@
 package fpinscala.exercises.datastructures
 
 import fpinscala.answers.testing.exhaustive.*
-import fpinscala.answers.testing.exhaustive.Prop.*
-import fpinscala.exercises.common.Common.*
 import fpinscala.exercises.common.PropSuite
-import fpinscala.exercises.datastructures.Tree
 import fpinscala.exercises.datastructures.Tree.*
 import fpinscala.exercises.datastructures.TreeSuite.genIntTree
 
