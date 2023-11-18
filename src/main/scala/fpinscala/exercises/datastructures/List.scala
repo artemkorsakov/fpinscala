@@ -150,4 +150,19 @@ object List: // `List` companion object. Contains functions for creating and wor
       case (Cons(ha, ta), Cons(hb, tb)) =>
         Cons(f(ha, hb), zipWith(ta, tb, f))
 
-  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = ???
+  @tailrec
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean =
+    sup == sub || startWith(sup, sub) || {
+      sup match
+        case Cons(_, tail) => hasSubsequence(tail, sub)
+        case _             => false
+    }
+
+  @tailrec
+  private def startWith[A](sup: List[A], sub: List[A]): Boolean =
+    (sup, sub) match
+      case (_, Nil) => true
+      case (Cons(headSup, tailSup), Cons(headSub, tailSub))
+          if headSup == headSub =>
+        startWith(tailSup, tailSub)
+      case _ => false
