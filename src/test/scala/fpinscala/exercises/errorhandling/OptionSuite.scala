@@ -1,13 +1,12 @@
 package fpinscala.exercises.errorhandling
 
 import fpinscala.answers.testing.exhaustive.*
-import fpinscala.answers.testing.exhaustive.Prop.*
 import fpinscala.exercises.common.Common.*
 import fpinscala.exercises.common.PropSuite
 import fpinscala.exercises.errorhandling.*
 import fpinscala.exercises.errorhandling.Option.*
 
-import scala.{Either as SEither, Left as SLeft, None as SNone, Option as SOption, Right as SRight, Some as SSome}
+import scala.{None as SNone, Some as SSome}
 
 class OptionSuite extends PropSuite:
   private val genIntOption: Gen[Option[Int]] =
@@ -52,8 +51,9 @@ class OptionSuite extends PropSuite:
     case Some(n) => assertEquals(Some(n).getOrElse(1), n)
 
   test("Option.flatMap")(genIntOption):
-    case None    => assertEquals(None.flatMap(intToOptString), None)
-    case Some(n) => assertEquals(Some(n).flatMap(intToOptString), Some(n.toString))
+    case None => assertEquals(None.flatMap(intToOptString), None)
+    case Some(n) =>
+      assertEquals(Some(n).flatMap(intToOptString), Some(n.toString))
 
   test("Option.orElse")(genIntOption):
     case None => assertEquals(None.orElse(otherOpt), otherOpt)
@@ -66,7 +66,10 @@ class OptionSuite extends PropSuite:
       assertEquals(Some(n).filter(a => a == n + 1), None)
 
   test("Option.mean")(genDoubleList): list =>
-    assertEquals(Option.mean(list), if list.isEmpty then None else Some(list.sum / list.length))
+    assertEquals(
+      Option.mean(list),
+      if list.isEmpty then None else Some(list.sum / list.length)
+    )
 
   test("Option.variance")(genDoubleList): list =>
     val expected =
@@ -78,8 +81,9 @@ class OptionSuite extends PropSuite:
     assertEquals(Option.variance(list), expected)
 
   test("Option.map2")(genIntOption ** genIntOption):
-    case (Some(a), Some(b)) => assertEquals(Option.map2(Some(a), Some(b))(_ + _), Some(a + b))
-    case (opt1, opt2)       => assertEquals(Option.map2(opt1, opt2)(_ + _), None)
+    case (Some(a), Some(b)) =>
+      assertEquals(Option.map2(Some(a), Some(b))(_ + _), Some(a + b))
+    case (opt1, opt2) => assertEquals(Option.map2(opt1, opt2)(_ + _), None)
 
   test("Option.sequence")(genOptionSeq): optionList =>
     val expected: Option[List[Int]] =
