@@ -91,18 +91,36 @@ object LazyList:
 
   val ones: LazyList[Int] = LazyList.cons(1, ones)
 
-  def continually[A](a: A): LazyList[A] = ???
+  def continually[A](a: A): LazyList[A] =
+    Cons(() => a, () => continually(a))
 
-  def from(n: Int): LazyList[Int] = ???
+  def from(n: Int): LazyList[Int] =
+    Cons(() => n, () => from(n + 1))
 
-  lazy val fibs: LazyList[Int] = ???
+  lazy val fibs: LazyList[Int] =
+    def loop(first: Int, second: Int): LazyList[Int] =
+      Cons(() => first, () => loop(second, first + second))
+    loop(0, 1)
 
-  def unfold[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] = ???
+  def unfold[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] = f(
+    state
+  ) match
+    case None            => empty
+    case Some((a, next)) => cons(a, unfold(next)(f))
 
-  lazy val fibsViaUnfold: LazyList[Int] = ???
+  lazy val fibsViaUnfold: LazyList[Int] =
+    unfold((0, 1)) { case (f, s) =>
+      Some((f, (s, f + s)))
+    }
 
-  def fromViaUnfold(n: Int): LazyList[Int] = ???
+  def fromViaUnfold(n: Int): LazyList[Int] =
+    unfold(n): n =>
+      Some((n, n + 1))
 
-  def continuallyViaUnfold[A](a: A): LazyList[A] = ???
+  def continuallyViaUnfold[A](a: A): LazyList[A] =
+    unfold(a): a =>
+      Some((a, a))
 
-  lazy val onesViaUnfold: LazyList[Int] = ???
+  lazy val onesViaUnfold: LazyList[Int] =
+    unfold(()): _ =>
+      Some((1, ()))
