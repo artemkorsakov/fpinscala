@@ -2,13 +2,11 @@ package fpinscala.exercises.laziness
 
 import fpinscala.answers.testing.exhaustive.*
 import fpinscala.answers.testing.exhaustive.Gen.`**`
-import fpinscala.answers.testing.exhaustive.Prop.*
 import fpinscala.exercises.common.Common.*
 import fpinscala.exercises.common.PropSuite
-import fpinscala.exercises.laziness.LazyList
 import fpinscala.exercises.laziness.LazyList.*
 
-import scala.util.{Random, Try}
+import scala.util.Random
 
 class LazyListSuite extends PropSuite:
   private val genSmallInt = Gen.choose(0, 10)
@@ -25,16 +23,6 @@ class LazyListSuite extends PropSuite:
           yield Cons(() => head, () => tail)
     loop()
 
-  test("LazyList.headOption")(genLazyList):
-    case Empty      => assert(Empty.headOption.isEmpty)
-    case Cons(h, t) => assert(Cons(h, t).headOption.contains(h()))
-
-  test("LazyList.cons")(
-    genLazyList.map(tail => (LazyList.cons(Random.nextInt, tail), Cons(Random.nextInt, () => tail)))
-  ): (smartConstructor, oldConstructor) =>
-    assertEquals(smartConstructor.headOption, smartConstructor.headOption)
-    assertNotEquals(oldConstructor.headOption, oldConstructor.headOption)
-
   test("LazyList.toList")(genIntList): list =>
     assertEquals(LazyList(list*).toList, list)
 
@@ -48,17 +36,38 @@ class LazyListSuite extends PropSuite:
 
   test("LazyList.takeWhile")(genSmallInt ** genLazyList):
     case n ** lazyList =>
-      assertEquals(lazyList.takeWhile(_ != n).toList, lazyList.toList.takeWhile(_ != n))
+      assertEquals(
+        lazyList.takeWhile(_ != n).toList,
+        lazyList.toList.takeWhile(_ != n)
+      )
 
   test("LazyList.forAll")(genSmallInt ** genLazyList):
     case n ** lazyList =>
       assertEquals(lazyList.forAll(_ != n), !lazyList.toList.contains(n))
 
-  /*
+  test("LazyList.takeWhileViaFoldRight")(genSmallInt ** genLazyList):
+    case n ** lazyList =>
+      assertEquals(
+        lazyList.takeWhileViaFoldRight(_ != n).toList,
+        lazyList.toList.takeWhile(_ != n)
+      )
+
+  test("LazyList.headOption")(genLazyList):
+    case Empty      => assert(Empty.headOption.isEmpty)
+    case Cons(h, t) => assert(Cons(h, t).headOption.contains(h()))
+
+  test("LazyList.cons")(
+    genLazyList.map(tail =>
+      (LazyList.cons(Random.nextInt, tail), Cons(Random.nextInt, () => tail))
+    )
+  ): (smartConstructor, oldConstructor) =>
+    assertEquals(smartConstructor.headOption, smartConstructor.headOption)
+    assertNotEquals(oldConstructor.headOption, oldConstructor.headOption)
+  
   test("LazyList.map")(genSmallInt ** genLazyList):
     case n ** lazyList =>
       assertEquals(lazyList.map(_ + n).toList, lazyList.toList.map(_ + n))
-
+  
   test("LazyList.filter")(genSmallInt ** genLazyList):
     case n ** lazyList =>
       assertEquals(lazyList.filter(_ != n).toList, lazyList.toList.filter(_ != n))
@@ -70,7 +79,6 @@ class LazyListSuite extends PropSuite:
   test("LazyList.flatMap")(genSmallInt ** genLazyList):
     case n ** lazyList =>
       assertEquals(lazyList.flatMap(a => LazyList(a + n)).toList, lazyList.toList.flatMap(a => List(a + n)))
-   */
 
   test("LazyList.ones")(genMidInt): n =>
     assertEquals(ones.take(n).toList, List.fill(n)(1))
@@ -92,7 +100,10 @@ class LazyListSuite extends PropSuite:
     assertEquals(unfold(1)(genFirstNumbers).toList, (1 to n).toList)
 
   test("LazyList.fibsViaUnfold")(genLengthOfFibonacciSeq): n =>
-    assertEquals(fibsViaUnfold.take(n).toList, theFirst21FibonacciNumbers.take(n).toList)
+    assertEquals(
+      fibsViaUnfold.take(n).toList,
+      theFirst21FibonacciNumbers.take(n).toList
+    )
 
   test("LazyList.fromViaUnfold")(genMidInt ** genMidInt):
     case n ** a =>
@@ -129,7 +140,10 @@ class LazyListSuite extends PropSuite:
 
   test("LazyList.startsWith")(genLazyList ** genLazyList):
     case list1 ** list2 =>
-      assertEquals(list1.startsWith(list2), list1.toList.startsWith(list2.toList))
+      assertEquals(
+        list1.startsWith(list2),
+        list1.toList.startsWith(list2.toList)
+      )
       assert(list1.startsWith(empty))
       assert(list1.startsWith(list1))
 
