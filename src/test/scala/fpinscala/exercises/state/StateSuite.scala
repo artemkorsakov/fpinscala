@@ -1,7 +1,6 @@
 package fpinscala.exercises.state
 
 import fpinscala.answers.testing.exhaustive.*
-import fpinscala.answers.testing.exhaustive.Prop.*
 import fpinscala.exercises.common.Common.*
 import fpinscala.exercises.common.PropSuite
 import fpinscala.exercises.state.State
@@ -25,7 +24,7 @@ class StateSuite extends PropSuite:
     val (a, s) = unit[Int, String](str).run(0)
     assertEquals(a, str)
     assertEquals(s, 0)
-  */
+   */
 
   test("State.map")(genStringList): list =>
     val (b, s) = stateA.map(length).run(list)
@@ -55,7 +54,7 @@ class StateSuite extends PropSuite:
     val (first, rest) = list.splitAt(half)
     assertEquals(firstHalfElements, first.map(Some(_)))
     assertEquals(restElements, rest)
-  */
+   */
 
   private def length(maybeHead: Option[String]): Int =
     maybeHead.getOrElse("").length
