@@ -75,7 +75,53 @@ enum LazyList[+A]:
   def flatMap[B](f: A => LazyList[B]): LazyList[B] =
     foldRight(empty[B])((a, bs) => f(a).append(bs))
 
-  def startsWith[B](s: LazyList[B]): Boolean = ???
+  def mapViaUnfold[B](f: A => B): LazyList[B] =
+    unfold[B, LazyList[A]](this):
+      case LazyList.Empty      => None
+      case LazyList.Cons(h, t) => Some((f(h()), t()))
+
+  def takeViaUnfold(n: Int): LazyList[A] =
+    unfold[A, (Int, LazyList[A])]((n, this)): (n, listA) =>
+      listA match
+        case Cons(h, t) if n > 0 =>
+          Some((h(), (n - 1, t())))
+        case _ => None
+
+  def takeWhileViaUnfold(p: A => Boolean): LazyList[A] =
+    unfold[A, LazyList[A]](this):
+      case LazyList.Cons(h, t) if p(h()) => Some((h(), t()))
+      case _                             => None
+
+  def zipWith[B, C](that: LazyList[B])(f: (A, B) => C): LazyList[C] =
+    unfold[C, (LazyList[A], LazyList[B])]((this, that)):
+      case (LazyList.Cons(ha, ta), LazyList.Cons(hb, tb)) =>
+        Some((f(ha(), hb()), (ta(), tb())))
+      case _ => None
+
+  def zipAll[B](that: LazyList[B]): LazyList[(Option[A], Option[B])] =
+    unfold[(Option[A], Option[B]), (LazyList[A], LazyList[B])]((this, that)):
+      case (Cons(ha, ta), Cons(hb, tb)) =>
+        val item: (Option[A], Option[B]) = (Some(ha()), Some(hb()))
+        val nextState: (LazyList[A], LazyList[B]) = (ta(), tb())
+        Some((item, nextState))
+      case (Cons(ha, ta), Empty) =>
+        val item: (Option[A], Option[B]) = (Some(ha()), None)
+        val nextState: (LazyList[A], LazyList[B]) = (ta(), Empty)
+        Some((item, nextState))
+      case (Empty, Cons(hb, tb)) =>
+        val item: (Option[A], Option[B]) = (None, Some(hb()))
+        val nextState: (LazyList[A], LazyList[B]) = (Empty, tb())
+        Some((item, nextState))
+      case (Empty, Empty) =>
+        None
+
+  def startsWith[B](s: LazyList[B]): Boolean =
+    zipAll[B](s)
+      .map:
+        case (_, None)          => true
+        case (None, _)          => false
+        case (Some(a), Some(b)) => a == b
+      .forAll(identity)
 
 object LazyList:
   def cons[A](hd: => A, tl: => LazyList[A]): LazyList[A] =
