@@ -123,6 +123,22 @@ enum LazyList[+A]:
         case (Some(a), Some(b)) => a == b
       .forAll(identity)
 
+  def tails: LazyList[LazyList[A]] =
+    unfold(this):
+      case Empty          => None
+      case l @ Cons(_, t) => Some((l, t()))
+    .append(LazyList(empty))
+
+  def hasSubsequence[B >: A](l: LazyList[B]): Boolean =
+    tails.exists(_.startsWith(l))
+
+  def scanRight[B >: A](init: B)(combine: (A, B) => B): LazyList[B] =
+    foldRight(init -> LazyList(init)): (a, bAndListB) =>
+      lazy val (b, listB) = bAndListB
+      val b2 = combine(a, b)
+      (b2, cons(b2, listB))
+    ._2
+
 object LazyList:
   def cons[A](hd: => A, tl: => LazyList[A]): LazyList[A] =
     lazy val head = hd
