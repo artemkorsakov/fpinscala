@@ -82,11 +82,9 @@ class RNGSuite extends PropSuite:
         checkRND(rng, counter, map(int)(_.toString), _.toIntOption.isDefined)
       )
 
-  /*
   test("RNG._double")(genRNG ** genCounter):
     case rng ** counter =>
-      assert(checkRND(rng, counter, _double, isInInterval))
-   */
+      assert(checkRND(rng, counter, double2, isInInterval))
 
   test("RNG.map2")(genRNG ** genCounter):
     case rng ** counter =>
