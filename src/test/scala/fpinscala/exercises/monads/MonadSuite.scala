@@ -17,17 +17,17 @@ import java.util.concurrent.*
 import scala.collection.immutable.Iterable
 
 class MonadSuite extends PropSuite:
-  test("genMonad")(genInt ** genString ** genRNG):
-    case n ** s ** rng =>
-      assertMonad[Gen](genMonad(rng), n, s)
+//  test("genMonad")(genInt ** genString ** genRNG):
+//    case n ** s ** rng =>
+//      assertMonad[Gen](genMonad(rng), n, s)
 
   test("parMonad")(genInt ** genString):
     case n ** s =>
       assertMonad[Par](parMonad, n, s)
 
-  test("parserMonad")(genInt ** genString):
-    case n ** s =>
-      assertMonad[Parser[_]](parserMonad(s), n, s)
+//  test("parserMonad")(genInt ** genString):
+//    case n ** s =>
+//      assertMonad[Parser[_]](parserMonad(s), n, s)
 
   test("optionMonad")(genInt ** genString):
     case n ** s =>

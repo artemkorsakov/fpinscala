@@ -8,21 +8,21 @@ import state.*
 import parallelism.Par.*
 
 trait Functor[F[_]]:
-  extension [A](fa: F[A])
-    def map[B](f: A => B): F[B]
+  extension [A](fa: F[A]) def map[B](f: A => B): F[B]
 
-  extension [A, B](fab: F[(A, B)]) def distribute: (F[A], F[B]) =
-    (fab.map(_(0)), fab.map(_(1)))
+  extension [A, B](fab: F[(A, B)])
+    def distribute: (F[A], F[B]) =
+      (fab.map(_(0)), fab.map(_(1)))
 
-  extension [A, B](e: Either[F[A], F[B]]) def codistribute: F[Either[A, B]] =
-    e match
-      case Left(fa) => fa.map(Left(_))
-      case Right(fb) => fb.map(Right(_))
+  extension [A, B](e: Either[F[A], F[B]])
+    def codistribute: F[Either[A, B]] =
+      e match
+        case Left(fa)  => fa.map(Left(_))
+        case Right(fb) => fb.map(Right(_))
 
 object Functor:
   given listFunctor: Functor[List] with
-    extension [A](as: List[A])
-      def map[B](f: A => B): List[B] = as.map(f)
+    extension [A](as: List[A]) def map[B](f: A => B): List[B] = as.map(f)
 
 trait Monad[F[_]] extends Functor[F]:
   def unit[A](a: => A): F[A]
@@ -30,7 +30,7 @@ trait Monad[F[_]] extends Functor[F]:
   extension [A](fa: F[A])
     def flatMap[B](f: A => F[B]): F[B] =
       fa.map(f).join
-    
+
     def map[B](f: A => B): F[B] =
       fa.flatMap(a => unit(f(a)))
 
@@ -38,10 +38,13 @@ trait Monad[F[_]] extends Functor[F]:
       fa.flatMap(a => fb.map(b => f(a, b)))
 
   def sequence[A](fas: List[F[A]]): F[List[A]] =
-    ???
+    traverse(fas)(identity)
 
   def traverse[A, B](as: List[A])(f: A => F[B]): F[List[B]] =
-    ???
+    as match
+      case Nil => unit(Nil)
+      case h :: t =>
+        f(h).map2(traverse(t)(f))(_ :: _)
 
   def replicateM[A](n: Int, fa: F[A]): F[List[A]] =
     ???
@@ -51,13 +54,14 @@ trait Monad[F[_]] extends Functor[F]:
 
   extension [A](fa: F[A])
     def flatMapViaCompose[B](f: A => F[B]): F[B] =
-      ???
+      compose[Unit, A, B](_ => fa, f)(())
 
   def filterM[A](as: List[A])(f: A => F[Boolean]): F[List[A]] =
     ???
 
-  extension [A](ffa: F[F[A]]) def join: F[A] =
-    ???
+  extension [A](ffa: F[F[A]])
+    def join: F[A] =
+      ffa.flatMap(identity)
 
   extension [A](fa: F[A])
     def flatMapViaJoinAndMap[B](f: A => F[B]): F[B] =
@@ -66,7 +70,7 @@ trait Monad[F[_]] extends Functor[F]:
   def composeViaJoinAndMap[A, B, C](f: A => F[B], g: B => F[C]): A => F[C] =
     ???
 
-end Monad      
+end Monad
 
 object Monad:
   given genMonad: Monad[Gen] with
@@ -76,58 +80,67 @@ object Monad:
         Gen.flatMap(fa)(f)
 
   given parMonad: Monad[Par] with
-    def unit[A](a: => A) = ???
+    def unit[A](a: => A): Par[A] = Par.unit(a)
     extension [A](fa: Par[A])
       override def flatMap[B](f: A => Par[B]): Par[B] =
-        ???
+        Par.flatMap(fa)(f)
 
   def parserMonad[P[+_]](p: Parsers[P]): Monad[P] = new:
-    def unit[A](a: => A) = ???
+    def unit[A](a: => A): P[A] = ???
     extension [A](fa: P[A])
       override def flatMap[B](f: A => P[B]): P[B] =
         ???
 
   given optionMonad: Monad[Option] with
-    def unit[A](a: => A) = ???
+    def unit[A](a: => A): Option[A] = Some(a)
     extension [A](fa: Option[A])
-      override def flatMap[B](f: A => Option[B]) =
-        ???
+      override def flatMap[B](f: A => Option[B]): Option[B] =
+        fa match
+          case None    => None
+          case Some(a) => f(a)
 
   given lazyListMonad: Monad[LazyList] with
-    def unit[A](a: => A) = ???
+    def unit[A](a: => A): LazyList[A] = LazyList(a)
     extension [A](fa: LazyList[A])
-      override def flatMap[B](f: A => LazyList[B]) =
-        ???
+      override def flatMap[B](f: A => LazyList[B]): LazyList[B] =
+        fa.flatMap(f)
 
   given listMonad: Monad[List] with
-    def unit[A](a: => A) = ???
+    def unit[A](a: => A): List[A] = List(a)
     extension [A](fa: List[A])
-      override def flatMap[B](f: A => List[B]) =
-        ???
+      override def flatMap[B](f: A => List[B]): List[B] =
+        fa.flatMap(f)
+
+  given [S]: Monad[[X] =>> State[S, X]] with
+    def unit[A](a: => A): State[S, A] = State.unit(a)
+    extension [A](stateA: State[S, A])
+      override def flatMap[B](f: A => State[S, B]): State[S, B] =
+        State: s =>
+          val (a, s1) = stateA.run(s)
+          f(a).run(s1)
 
 end Monad
 
 case class Id[+A](value: A):
   def map[B](f: A => B): Id[B] =
-    ???
+    Id(f(value))
   def flatMap[B](f: A => Id[B]): Id[B] =
-    ???
+    f(value)
 
 object Id:
   given idMonad: Monad[Id] with
-    def unit[A](a: => A) = ???
+    def unit[A](a: => A): Id[A] = Id(a)
     extension [A](fa: Id[A])
-      override def flatMap[B](f: A => Id[B]) =
-        ???
+      override def flatMap[B](f: A => Id[B]): Id[B] =
+        f(fa.value)
 
 opaque type Reader[-R, +A] = R => A
 
 object Reader:
-  extension [R, A](ra: Reader[R, A])
-    def run(r: R): A = ra(r)
+  extension [R, A](ra: Reader[R, A]) def run(r: R): A = ra(r)
 
   given readerMonad[R]: Monad[Reader[R, _]] with
-    def unit[A](a: => A): Reader[R, A] = ???
+    def unit[A](a: => A): Reader[R, A] = _ => a
     extension [A](fa: Reader[R, A])
-      override def flatMap[B](f: A => Reader[R, B]) =
-        ???
+      override def flatMap[B](f: A => Reader[R, B]): Reader[R, B] =
+        r => f(fa.run(r)).run(r)

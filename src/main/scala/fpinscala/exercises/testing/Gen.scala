@@ -5,7 +5,8 @@ import fpinscala.exercises.parallelism.*
 import fpinscala.exercises.parallelism.Par.Par
 import Gen.*
 import Prop.*
-import java.util.concurrent.{Executors,ExecutorService}
+
+import java.util.concurrent.{ExecutorService, Executors}
 
 /*
 The library developed in this chapter goes through several iterations. This file is just the
