@@ -3,6 +3,7 @@ package fpinscala.exercises.applicative
 import fpinscala.answers.monads.Functor
 import fpinscala.answers.monoids.Monoid
 import fpinscala.answers.state.State
+import fpinscala.exercises.monads.Id
 
 trait Applicative[F[_]] extends Functor[F]:
   self =>
@@ -134,3 +135,10 @@ object Applicative:
     extension [A](st: State[S, A])
       override def flatMap[B](f: A => State[S, B]): State[S, B] =
         State.flatMap(st)(f)
+
+  given Applicative[Id] with
+    def unit[A](a: => A): Id[A] = Id(a)
+
+    extension [A](fa: Id[A])
+      override def map2[B, C](fb: Id[B])(f: (A, B) => C): Id[C] =
+        Id(f(fa.value, fb.value))
